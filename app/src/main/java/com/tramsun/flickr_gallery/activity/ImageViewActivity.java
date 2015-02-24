@@ -17,10 +17,6 @@ public class ImageViewActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        /*ImageData data = null;
-        if( getIntent() != null ) {
-            data = getIntent().getParcelableExtra(Constants.IMAGE_DATA);
-        }*/
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, ImageViewFragment.newInstance(false))

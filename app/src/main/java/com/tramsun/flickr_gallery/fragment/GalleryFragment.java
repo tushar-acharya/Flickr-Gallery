@@ -1,12 +1,15 @@
 package com.tramsun.flickr_gallery.fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -15,9 +18,11 @@ import android.widget.TextView;
 
 import com.tramsun.flickr_gallery.Constants;
 import com.tramsun.flickr_gallery.R;
+import com.tramsun.flickr_gallery.activity.ImageViewActivity;
 import com.tramsun.flickr_gallery.adapter.ImagesAdapter;
 import com.tramsun.flickr_gallery.interfaces.GalleryActions;
 import com.tramsun.flickr_gallery.model.ImageData;
+import com.tramsun.flickr_gallery.utils.FileUtils;
 import com.tramsun.flickr_gallery.utils.FlickrManager;
 import com.tramsun.flickr_gallery.utils.KeyboardUtils;
 
@@ -37,6 +42,7 @@ public class GalleryFragment extends BaseFragment implements GalleryActions {
     private ImagesAdapter adapter;
     private ArrayList<ImageData> imagesList;
     private Context context;
+    private ProgressDialog dialog;
 
     public void setTagError(final String error) {
         if( tag != null && error != null && !error.isEmpty() ) {
@@ -64,6 +70,10 @@ public class GalleryFragment extends BaseFragment implements GalleryActions {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if( dialog != null ) {
+            dialog.dismiss();
+            dialog = null;
+        }
     }
 
     @Override
@@ -72,6 +82,9 @@ public class GalleryFragment extends BaseFragment implements GalleryActions {
         LinearLayout root = (LinearLayout) inflater.inflate(R.layout.fragment_gallery, container, false);
         context = inflater.getContext();
         ButterKnife.inject(this, root);
+
+        dialog = new ProgressDialog(context);
+        dialog.setMessage("Fetching image..");
 
         search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,7 +100,32 @@ public class GalleryFragment extends BaseFragment implements GalleryActions {
                 return true;
             }
         });
+        grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                showDialog(true);
+                try {
+                    if (imagesList != null && imagesList.get(position).getThumb() != null) {
+                        new FlickrManager.GetLargePhotoThread(GalleryFragment.this, imagesList.get(position)).start();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         return root;
+    }
+
+    private void showDialog(boolean show) {
+        if(dialog != null) {
+            if(show) dialog.show();
+            else dialog.cancel();
+        }
+    }
+
+    private void startImageViewActivity() {
+        Intent intent = new Intent(context, ImageViewActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -119,6 +157,10 @@ public class GalleryFragment extends BaseFragment implements GalleryActions {
 
     @Override
     public void imageFetched(ImageData imageData) {
+        log.e("imageFetched: imageData="+imageData);
+        FileUtils.saveImageCache(context, imageData.getPhoto());
+        showDialog(false);
+        startImageViewActivity();
     }
 
     @Override

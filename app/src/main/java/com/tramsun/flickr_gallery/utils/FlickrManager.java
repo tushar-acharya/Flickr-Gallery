@@ -39,7 +39,7 @@ public class FlickrManager {
 	public static final int PHOTO_LARGE = 222;
 
 	private static String createURL(int methodId, String parameter) {
-		String method_type = "";
+		String method_type;
 		String url = null;
 		switch (methodId) {
 		case FLICKR_PHOTOS_SEARCH_ID:
@@ -53,6 +53,43 @@ public class FlickrManager {
 		}
 		return url;
 	}
+
+	public static Bitmap getImage(ImageData imgCon) {
+		Bitmap bm = null;
+		try {
+			URL aURL = new URL(imgCon.getLargeURL());
+			URLConnection conn = aURL.openConnection();
+			conn.connect();
+			InputStream is = conn.getInputStream();
+			BufferedInputStream bis = new BufferedInputStream(is);
+			bm = BitmapFactory.decodeStream(bis);
+			bis.close();
+			is.close();
+		} catch (Exception e) {
+			Log.e("FlickrManager", e.getMessage());
+		}
+		return bm;
+	}
+
+    public static class GetLargePhotoThread extends Thread {
+        private final GalleryActions actions;
+        ImageData imageData;
+
+        public GetLargePhotoThread(GalleryActions actions, ImageData imageData) {
+            this.actions = actions;
+            this.imageData = imageData;
+        }
+
+        @Override
+        public void run() {
+            if (imageData.getPhoto() == null) {
+                imageData.setPhoto(FlickrManager.getImage(imageData));
+            }
+            if (imageData.getPhoto() != null) {
+                actions.imageFetched(imageData);
+            }
+        }
+    }
 
 	public static Bitmap getThumbnail(ImageData imgCon) {
 		Bitmap bm = null;

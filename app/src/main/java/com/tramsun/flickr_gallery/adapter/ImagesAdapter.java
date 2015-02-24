@@ -20,9 +20,9 @@ import java.util.ArrayList;
  * Created by Tushar on 24-02-2015.
  */
 public class ImagesAdapter extends BaseAdapter{
-    private final GalleryActions actions;
-    private Context mContext;
+    private final Context mContext;
     private ArrayList<ImageData> imageDatas;
+    private final GalleryActions actions;
 
     public ImagesAdapter(Context c, ArrayList<ImageData> imageDatas, GalleryActions actions) {
         this.mContext = c;
