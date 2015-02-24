@@ -20,6 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activity.ImageViewActivity"
+            android:label="@string/gallery_image" >
+        </activity>
     </application>
 
 </manifest>
