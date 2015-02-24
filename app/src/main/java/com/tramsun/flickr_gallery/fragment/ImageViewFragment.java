@@ -50,7 +50,7 @@ public class ImageViewFragment extends BaseFragment{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if(bitmap != null) {
-            AnimUtils.fadeIn(image, bitmap, 1000);
+            AnimUtils.fadeIn(image, bitmap, 800);
         }
     }
 
@@ -61,7 +61,7 @@ public class ImageViewFragment extends BaseFragment{
         if(bitmap == null) {
             bitmap = FileUtils.loadImage(context);
             log.d("onStart: image=" + image + ", bitmap=" + bitmap);
-            AnimUtils.fadeIn(image, bitmap, 1000);
+            AnimUtils.fadeIn(image, bitmap, 800);
         }
     }
 

@@ -27,17 +27,20 @@ public class ImageViewActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        log.e("onOptionsItemSelected");
-        if (id == R.id.action_download) {
-            log.e("onOptionsItemSelected: Download clicked");
-            try {
-                ImageViewFragment fragment = (ImageViewFragment) getSupportFragmentManager().findFragmentById(R.id.container);
-                FileUtils.saveImageExternal(getApplicationContext(), fragment.getBitmap(), fragment.getBitmap().hashCode() + ".png");
-                Toast.makeText(getApplicationContext(), "File saved to SD card", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_download:
+                log.e("onOptionsItemSelected: Download clicked");
+                try {
+                    ImageViewFragment fragment = (ImageViewFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+                    FileUtils.saveImageExternal(getApplicationContext(), fragment.getBitmap(), fragment.getBitmap().hashCode() + ".png");
+                    Toast.makeText(getApplicationContext(), "File saved to SD card", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
+            case android.R.id.home:
+                onBackPressed();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

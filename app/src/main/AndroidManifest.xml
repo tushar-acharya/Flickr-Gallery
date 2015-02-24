@@ -22,7 +22,11 @@
         </activity>
         <activity
             android:name=".activity.ImageViewActivity"
+            android:parentActivityName=".activity.MainActivity"
             android:label="@string/gallery_image" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.tramsun.flickr_gallery.activity.MainActivity" />
         </activity>
     </application>
 

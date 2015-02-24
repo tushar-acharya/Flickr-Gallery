@@ -125,7 +125,7 @@ public class GalleryFragment extends BaseFragment implements GalleryActions {
 
     private void startImageViewActivity() {
         Intent intent = new Intent(context, ImageViewActivity.class);
-        startActivity(intent);
+        if(getActivity() != null) startActivity(intent);
     }
 
     @Override
