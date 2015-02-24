@@ -3,7 +3,6 @@ package com.tramsun.flickr_gallery.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import com.tramsun.flickr_gallery.interfaces.GalleryActions;
 import com.tramsun.flickr_gallery.model.ImageData;
@@ -13,8 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -30,22 +29,20 @@ import static com.tramsun.flickr_gallery.Constants.TAGS_STRING;
 
 public class FlickrManager {
 
-	// String to create Flickr API urls
-
 	private static final int FLICKR_PHOTOS_SEARCH_ID = 1;
 	private static final int FLICKR_GET_SIZES_ID = 2;
 	private static final int NUMBER_OF_PHOTOS = 100;
 
-	public static final int PHOTO_THUMB = 111;
-	public static final int PHOTO_LARGE = 222;
+	public static final int PHOTO_THUMB = 0;
+	public static final int PHOTO_LARGE = 1;
 
-	private static String createURL(int methodId, String parameter) {
+	private static String createURL(int methodId, String parameter) throws UnsupportedEncodingException {
 		String method_type;
 		String url = null;
 		switch (methodId) {
 		case FLICKR_PHOTOS_SEARCH_ID:
 			method_type = FLICKR_PHOTOS_SEARCH_STRING;
-			url = FLICKR_BASE_URL + method_type + API_KEY_SEARCH_STRING + TAGS_STRING + URLEncoder.encode(parameter) + FORMAT_STRING + "&per_page="+NUMBER_OF_PHOTOS+"&media=photos";
+			url = FLICKR_BASE_URL + method_type + API_KEY_SEARCH_STRING + TAGS_STRING + URLEncoder.encode(parameter, "UTF-8") + FORMAT_STRING + "&per_page="+NUMBER_OF_PHOTOS+"&media=photos";
 			break;
 		case FLICKR_GET_SIZES_ID:
 			method_type = FLICKR_GET_SIZES_STRING;
@@ -67,7 +64,7 @@ public class FlickrManager {
 			bis.close();
 			is.close();
 		} catch (Exception e) {
-			Log.e("FlickrManager", e.getMessage());
+			e.printStackTrace();
 		}
 		return bm;
 	}
@@ -104,7 +101,7 @@ public class FlickrManager {
 			bis.close();
 			is.close();
 		} catch (Exception e) {
-			Log.e("FlickrManager", e.getMessage());
+			e.printStackTrace();
 		}
 		return bm;
 	}
@@ -129,13 +126,22 @@ public class FlickrManager {
 	}
 
 	public static ArrayList<ImageData> searchImagesByTag(GalleryActions actions, Context ctx, String tag) {
-		String url = createURL(FLICKR_PHOTOS_SEARCH_ID, tag);
-		ArrayList<ImageData> tmp = new ArrayList<>();
+
+        // Create API call URL
+		String url = null;
+        try {
+            url = createURL(FLICKR_PHOTOS_SEARCH_ID, tag);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(url == null)
+            return null;
+
+		ArrayList<ImageData> imageDataArrayList = new ArrayList<>();
 		String jsonString = null;
 		try {
 			if (Net.isConnected(ctx)) {
-				ByteArrayOutputStream baos = Net.readBytes(url);
-				jsonString = baos.toString();
+                jsonString = Net.readBytes(url).toString();
 			}
 			try {
 				JSONObject root = new JSONObject(jsonString.replace("jsonFlickrApi(", "").replace(")", ""));
@@ -143,13 +149,13 @@ public class FlickrManager {
 				JSONArray imageJSONArray = photos.getJSONArray("photo");
 				for (int i = 0; i < imageJSONArray.length(); i++) {
 					JSONObject item = imageJSONArray.getJSONObject(i);
-					ImageData imgCon = new ImageData(item.getString("id"), item.getString("owner"), item.getString("secret"), item.getString("server"),
+					ImageData imageData = new ImageData(item.getString("id"), item.getString("owner"), item.getString("secret"), item.getString("server"),
 							item.getString("farm"));
-                    new GetThumbnailsThread(actions, imgCon).start();
-					imgCon.setPosition(i);
-					tmp.add(imgCon);
+                    new GetThumbnailsThread(actions, imageData).start();
+					imageData.setPosition(i);
+					imageDataArrayList.add(imageData);
 				}
-                actions.metaDataUpdated(tmp);
+                actions.metaDataUpdated(imageDataArrayList);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -157,7 +163,7 @@ public class FlickrManager {
 			nue.printStackTrace();
 		}
 
-		return tmp;
+		return imageDataArrayList;
 	}
 
 }
