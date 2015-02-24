@@ -2,4 +2,7 @@
     <string name="app_name">Flickr-Gallery</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="go">Go</string>
+    <string name="action_download">Download</string>
+    <string name="gallery_image">Gallery Image</string>
 </resources>
