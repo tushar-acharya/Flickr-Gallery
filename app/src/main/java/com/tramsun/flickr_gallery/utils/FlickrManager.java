@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import static com.tramsun.flickr_gallery.Constants.API_KEY_SEARCH_STRING;
@@ -44,7 +45,7 @@ public class FlickrManager {
 		switch (methodId) {
 		case FLICKR_PHOTOS_SEARCH_ID:
 			method_type = FLICKR_PHOTOS_SEARCH_STRING;
-			url = FLICKR_BASE_URL + method_type + API_KEY_SEARCH_STRING + TAGS_STRING + parameter + FORMAT_STRING + "&per_page="+NUMBER_OF_PHOTOS+"&media=photos";
+			url = FLICKR_BASE_URL + method_type + API_KEY_SEARCH_STRING + TAGS_STRING + URLEncoder.encode(parameter) + FORMAT_STRING + "&per_page="+NUMBER_OF_PHOTOS+"&media=photos";
 			break;
 		case FLICKR_GET_SIZES_ID:
 			method_type = FLICKR_GET_SIZES_STRING;
