@@ -3,6 +3,7 @@ package com.tramsun.flickr_gallery.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.tramsun.flickr_gallery.interfaces.GalleryActions;
 import com.tramsun.flickr_gallery.model.ImageData;
@@ -10,6 +11,10 @@ import com.tramsun.flickr_gallery.model.ImageData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -27,7 +32,7 @@ import static com.tramsun.flickr_gallery.Constants.FORMAT_STRING;
 import static com.tramsun.flickr_gallery.Constants.PHOTO_ID_STRING;
 import static com.tramsun.flickr_gallery.Constants.TAGS_STRING;
 
-public class FlickrManager {
+public class ImageLibAPIManager {
 
 	private static final int FLICKR_PHOTOS_SEARCH_ID = 1;
 	private static final int FLICKR_GET_SIZES_ID = 2;
@@ -81,7 +86,7 @@ public class FlickrManager {
         @Override
         public void run() {
             if (imageData.getPhoto() == null) {
-                imageData.setPhoto(FlickrManager.getImage(imageData));
+                imageData.setPhoto(ImageLibAPIManager.getImage(imageData));
             }
             if (imageData.getPhoto() != null) {
                 actions.imageFetched(imageData);
@@ -142,6 +147,26 @@ public class FlickrManager {
 		try {
 			if (Net.isConnected(ctx)) {
                 jsonString = Net.readBytes(url).toString();
+                Log.e("Crazy", "search=" + URLEncoder.encode(tag, "UTF-8"));
+
+                String imgurString = Net.getString("http://imgur.com/?q=" + URLEncoder.encode(tag, "UTF-8"));
+                Log.e("Crazy", "imgurString=" + imgurString);
+                Document document = Jsoup.parse(imgurString, "http://imgur.com");
+                Elements key_tds = document.select(".image-list-link img");
+                Element first_keyTd = key_tds.first();
+                Element last_keyTd = key_tds.last();
+
+                Log.e("Crazy", "key_tds=" + key_tds);
+                Log.e("Crazy", "key_tds size=" + key_tds.size());
+                Element key = first_keyTd;
+                int i=0;
+                while (key != last_keyTd) {
+                    String keyVal = key.text();
+                    Log.e("Crazy", ""+keyVal);
+                    Log.e("Crazy", ""+keyVal.substring(17));
+                    key=key_tds.get(i);
+                    i++;
+                }
 			}
 			try {
 				JSONObject root = new JSONObject(jsonString.replace("jsonFlickrApi(", "").replace(")", ""));
@@ -159,11 +184,12 @@ public class FlickrManager {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-		} catch (NullPointerException nue) {
+		} catch (Exception nue) {
 			nue.printStackTrace();
 		}
 
-		return imageDataArrayList;
+        return imageDataArrayList;
 	}
+
 
 }

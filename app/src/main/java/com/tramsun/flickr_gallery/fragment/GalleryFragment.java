@@ -23,7 +23,7 @@ import com.tramsun.flickr_gallery.adapter.ImagesAdapter;
 import com.tramsun.flickr_gallery.interfaces.GalleryActions;
 import com.tramsun.flickr_gallery.model.ImageData;
 import com.tramsun.flickr_gallery.utils.FileUtils;
-import com.tramsun.flickr_gallery.utils.FlickrManager;
+import com.tramsun.flickr_gallery.utils.ImageLibAPIManager;
 import com.tramsun.flickr_gallery.utils.KeyboardUtils;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class GalleryFragment extends BaseFragment implements GalleryActions {
         public void run() {
             String searchTag = tag.getText().toString().trim();
             if (searchTag.length() >= 3) {
-                FlickrManager.searchImagesByTag(GalleryFragment.this, context, searchTag);
+                ImageLibAPIManager.searchImagesByTag(GalleryFragment.this, context, searchTag);
             } else {
                 setTagError("Enter 3 or more letter word!");
             }
@@ -106,7 +106,7 @@ public class GalleryFragment extends BaseFragment implements GalleryActions {
                 showDialog(true);
                 try {
                     if (imagesList != null && imagesList.get(position).getThumb() != null) {
-                        new FlickrManager.GetLargePhotoThread(GalleryFragment.this, imagesList.get(position)).start();
+                        new ImageLibAPIManager.GetLargePhotoThread(GalleryFragment.this, imagesList.get(position)).start();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

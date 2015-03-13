@@ -11,7 +11,7 @@ import com.tramsun.flickr_gallery.R;
 import com.tramsun.flickr_gallery.interfaces.GalleryActions;
 import com.tramsun.flickr_gallery.model.ImageData;
 import com.tramsun.flickr_gallery.utils.AnimUtils;
-import com.tramsun.flickr_gallery.utils.FlickrManager;
+import com.tramsun.flickr_gallery.utils.ImageLibAPIManager;
 import com.tramsun.flickr_gallery.utils.Unit;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class ImagesAdapter extends BaseAdapter{
             }
         } else {
             i.setImageDrawable(mContext.getResources().getDrawable(R.color.lighter_gray));
-            new FlickrManager.GetThumbnailsThread(actions, data).start();
+            new ImageLibAPIManager.GetThumbnailsThread(actions, data).start();
         }
         return i;
     }

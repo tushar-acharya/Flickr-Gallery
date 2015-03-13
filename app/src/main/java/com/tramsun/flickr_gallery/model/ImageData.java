@@ -2,7 +2,7 @@ package com.tramsun.flickr_gallery.model;
 
 import android.graphics.Bitmap;
 
-import com.tramsun.flickr_gallery.utils.FlickrManager;
+import com.tramsun.flickr_gallery.utils.ImageLibAPIManager;
 
 public class ImageData {
     int position;
@@ -24,8 +24,8 @@ public class ImageData {
         this.secret = secret;
         this.server = server;
         this.farm = farm;
-        setThumbURL(createPhotoURL(FlickrManager.PHOTO_THUMB, this));
-        setLargeURL(createPhotoURL(FlickrManager.PHOTO_LARGE, this));
+        setThumbURL(createPhotoURL(ImageLibAPIManager.PHOTO_THUMB, this));
+        setLargeURL(createPhotoURL(ImageLibAPIManager.PHOTO_LARGE, this));
     }
 
     public String getThumbURL() {
@@ -64,10 +64,10 @@ public class ImageData {
     private String createPhotoURL(int photoType, ImageData imgCon) {
         String tmp = "http://farm" + imgCon.farm + ".staticflickr.com/" + imgCon.server + "/" + imgCon.id + "_" + imgCon.secret;// +".jpg";
         switch (photoType) {
-            case FlickrManager.PHOTO_THUMB:
+            case ImageLibAPIManager.PHOTO_THUMB:
                 tmp += "_t";
                 break;
-            case FlickrManager.PHOTO_LARGE:
+            case ImageLibAPIManager.PHOTO_LARGE:
                 tmp += "_z";
                 break;
 
