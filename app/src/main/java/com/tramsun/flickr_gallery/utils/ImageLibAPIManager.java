@@ -3,7 +3,6 @@ package com.tramsun.flickr_gallery.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import com.tramsun.flickr_gallery.interfaces.GalleryActions;
 import com.tramsun.flickr_gallery.model.ImageData;
@@ -40,8 +39,9 @@ public class ImageLibAPIManager {
 
 	public static final int PHOTO_THUMB = 0;
 	public static final int PHOTO_LARGE = 1;
+    private static Logger log = new Logger("ImageLibAPIManager");
 
-	private static String createURL(int methodId, String parameter) throws UnsupportedEncodingException {
+    private static String createURL(int methodId, String parameter) throws UnsupportedEncodingException {
 		String method_type;
 		String url = null;
 		switch (methodId) {
@@ -130,6 +130,19 @@ public class ImageLibAPIManager {
 
 	}
 
+    public static ArrayList<ImageData> merge(ArrayList<ImageData> a, ArrayList<ImageData> b) {
+        int c1 = 0, c2 = 0;
+        ArrayList<ImageData> res = new ArrayList<>();
+
+        while(c1 < a.size() || c2 < b.size()) {
+            if(c1 < a.size())
+                res.add(a.get(c1++));
+            if(c2 < b.size())
+                res.add(b.get(c2++));
+        }
+        return res;
+    }
+
 	public static ArrayList<ImageData> searchImagesByTag(GalleryActions actions, Context ctx, String tag) {
 
         // Create API call URL
@@ -142,28 +155,32 @@ public class ImageLibAPIManager {
         if(url == null)
             return null;
 
-		ArrayList<ImageData> imageDataArrayList = new ArrayList<>();
-		String jsonString = null;
+		ArrayList<ImageData> flickrImageData = new ArrayList<>();
+		ArrayList<ImageData> imgurImageData = new ArrayList<>();
+        ArrayList<ImageData> data = null;
+        String jsonString = null;
 		try {
 			if (Net.isConnected(ctx)) {
                 jsonString = Net.readBytes(url).toString();
-                Log.e("Crazy", "search=" + URLEncoder.encode(tag, "UTF-8"));
+                log.e("search=" + URLEncoder.encode(tag, "UTF-8"));
 
                 String imgurString = Net.getString("http://imgur.com/?q=" + URLEncoder.encode(tag, "UTF-8"));
-                Log.e("Crazy", "imgurString=" + imgurString);
+                log.e("imgurString=" + imgurString);
                 Document document = Jsoup.parse(imgurString, "http://imgur.com");
                 Elements key_tds = document.select(".image-list-link img");
                 Element first_keyTd = key_tds.first();
                 Element last_keyTd = key_tds.last();
 
-                Log.e("Crazy", "key_tds=" + key_tds);
-                Log.e("Crazy", "key_tds size=" + key_tds.size());
+                log.e("key_tds=" + key_tds);
+                log.e("key_tds size=" + key_tds.size());
                 Element key = first_keyTd;
                 int i=0;
                 while (key != last_keyTd) {
-                    String keyVal = key.text();
-                    Log.e("Crazy", ""+keyVal);
-                    Log.e("Crazy", ""+keyVal.substring(17));
+                    String keyVal = "http:"+key.attr("src");
+                    ImageData imageData = new ImageData();
+                    imageData.setLargeURL(keyVal);
+                    imageData.setThumbURL(keyVal);
+                    imgurImageData.add(imageData);
                     key=key_tds.get(i);
                     i++;
                 }
@@ -176,11 +193,14 @@ public class ImageLibAPIManager {
 					JSONObject item = imageJSONArray.getJSONObject(i);
 					ImageData imageData = new ImageData(item.getString("id"), item.getString("owner"), item.getString("secret"), item.getString("server"),
 							item.getString("farm"));
-                    new GetThumbnailsThread(actions, imageData).start();
 					imageData.setPosition(i);
-					imageDataArrayList.add(imageData);
+					flickrImageData.add(imageData);
 				}
-                actions.metaDataUpdated(imageDataArrayList);
+                data = merge(flickrImageData, imgurImageData);
+                for (int i = 0; i < data.size(); i++) {
+                    new GetThumbnailsThread(actions, data.get(i)).start();
+                }
+                actions.metaDataUpdated(data);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -188,7 +208,7 @@ public class ImageLibAPIManager {
 			nue.printStackTrace();
 		}
 
-        return imageDataArrayList;
+        return data;
 	}
 
 

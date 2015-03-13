@@ -17,6 +17,9 @@ public class ImageData {
     String farm;
     boolean loadAnimationDone = false;
 
+    public ImageData() {
+    }
+
     public ImageData(String id, String owner, String secret, String server, String farm) {
         super();
         this.id = id;
