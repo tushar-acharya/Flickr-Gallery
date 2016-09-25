@@ -1,12 +1,31 @@
 package com.tramsun.flickr_gallery.activity;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.ProgressDialog;
+import android.support.v7.app.AppCompatActivity;
 
-import com.tramsun.flickr_gallery.utils.Logger;
+public class BaseActivity extends AppCompatActivity {
+    private ProgressDialog dialog;
 
-/**
- * Created by Tushar on 25-02-2015.
- */
-public class BaseActivity extends ActionBarActivity{
-    public Logger log = new Logger(getClass().getSimpleName());
+    protected void showProgressDialog(boolean show) {
+        if (dialog == null) {
+            dialog = new ProgressDialog(this);
+            dialog.setMessage("Please Wait..");
+        }
+
+        if (show) {
+            dialog.show();
+        } else {
+            dialog.dismiss();
+        }
+    }
+
+
+    @Override protected void onDestroy() {
+        super.onDestroy();
+
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
+        }
+    }
 }

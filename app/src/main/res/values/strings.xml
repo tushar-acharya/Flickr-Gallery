@@ -5,4 +5,5 @@
     <string name="go">Go</string>
     <string name="action_download">Download</string>
     <string name="gallery_image">Gallery Image</string>
+    <string name="permission_error">Permission required to download</string>
 </resources>

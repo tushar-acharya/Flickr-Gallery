@@ -1,69 +1,78 @@
 package com.tramsun.flickr_gallery.adapter;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 
-import com.tramsun.flickr_gallery.R;
-import com.tramsun.flickr_gallery.interfaces.GalleryActions;
-import com.tramsun.flickr_gallery.model.ImageData;
-import com.tramsun.flickr_gallery.utils.AnimUtils;
-import com.tramsun.flickr_gallery.utils.ImageLibAPIManager;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.tramsun.flickr_gallery.data.model.FlickrPhoto;
 import com.tramsun.flickr_gallery.utils.Unit;
 
-import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Created by Tushar on 24-02-2015.
- */
-public class ImagesAdapter extends BaseAdapter{
-    private final Context mContext;
-    private ArrayList<ImageData> imageDatas;
-    private final GalleryActions actions;
+public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ImageHolder> {
+    private final Context context;
+    private final int dp150;
+    private List<FlickrPhoto> images;
+    private final OnImageClicked listener;
 
-    public ImagesAdapter(Context c, ArrayList<ImageData> imageDatas, GalleryActions actions) {
-        this.mContext = c;
-        this.imageDatas = imageDatas;
-        this.actions = actions;
+    public interface OnImageClicked {
+        void onImageClicked(FlickrPhoto imageData);
     }
 
-    public int getCount() {
-        return imageDatas.size();
+    public ImagesAdapter(Context context, List<FlickrPhoto> images, @Nullable OnImageClicked listener) {
+        this.context = context;
+        this.images = images;
+        this.listener = listener;
+        this.dp150 = Unit.dpToPx(context, 150);
     }
 
-    public ImageData getItem(int position) {
-        return imageDatas.get(position);
+    @Override public ImageHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        ImageView imageView = new ImageView(context);
+        RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp150);
+        imageView.setLayoutParams(lp);
+        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        return new ImageHolder(imageView);
     }
 
-    public long getItemId(int position) {
-        return position;
-    }
-
-    public View getView(int position, View convertView, ViewGroup parent) {
-        final ImageView i;
-        ImageData data = imageDatas.get(position);
-        if(convertView != null) {
-            i= (ImageView) convertView;
-        } else {
-            i = new ImageView(mContext);
-            GridView.LayoutParams lp = new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Unit.dpToPx(mContext, 150));
-            i.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            i.setLayoutParams(lp);
-        }
-        if (imageDatas.get(position).getThumb() != null) {
-            if(data.isLoadAnimationDone()) {
-                i.setImageBitmap(data.getThumb());
-            } else {
-                AnimUtils.fadeIn(i, data.getThumb());
-                data.setLoadAnimationDone(true);
+    @Override public void onBindViewHolder(ImageHolder holder, int position) {
+        final FlickrPhoto imageData = images.get(position);
+        Glide.with(context)
+                .load(imageData.getThumbnailUrl())
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .into(holder.imageView);
+        holder.imageView.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                if (listener != null) {
+                    listener.onImageClicked(imageData);
+                }
             }
-        } else {
-            i.setImageDrawable(mContext.getResources().getDrawable(R.color.lighter_gray));
-            new ImageLibAPIManager.GetThumbnailsThread(actions, data).start();
+        });
+    }
+
+    @Override public int getItemCount() {
+        return images.size();
+    }
+
+    public void setImages(List<FlickrPhoto> data) {
+        images.clear();
+
+        images.addAll(data);
+
+        notifyDataSetChanged();
+    }
+
+    public static class ImageHolder extends RecyclerView.ViewHolder {
+
+        public ImageView imageView;
+
+        public ImageHolder(View itemView) {
+            super(itemView);
+            imageView = (ImageView) itemView;
         }
-        return i;
     }
 }
