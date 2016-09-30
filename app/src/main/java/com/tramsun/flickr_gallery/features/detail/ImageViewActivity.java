@@ -1,4 +1,4 @@
-package com.tramsun.flickr_gallery.activity;
+package com.tramsun.flickr_gallery.features.detail;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -19,6 +19,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.tramsun.flickr_gallery.IntentConstants;
 import com.tramsun.flickr_gallery.R;
 import com.tramsun.flickr_gallery.databinding.ActivityViewImageBinding;
+import com.tramsun.flickr_gallery.features.base.BaseActivity;
 import com.tramsun.flickr_gallery.utils.FileUtils;
 
 import timber.log.Timber;

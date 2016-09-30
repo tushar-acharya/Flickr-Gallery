@@ -1,7 +1,6 @@
-package com.tramsun.flickr_gallery.adapter;
+package com.tramsun.flickr_gallery.features.search;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,14 +23,15 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ImageHolde
         void onImageClicked(FlickrPhoto imageData);
     }
 
-    public ImagesAdapter(Context context, List<FlickrPhoto> images, @Nullable OnImageClicked listener) {
+    public ImagesAdapter(Context context, SearchMvvm.ViewModel viewModel) {
         this.context = context;
-        this.images = images;
-        this.listener = listener;
+        this.images = viewModel.getAllImages();
+        this.listener = viewModel;
         this.dp150 = Unit.dpToPx(context, 150);
     }
 
-    @Override public ImageHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    @Override
+    public ImageHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ImageView imageView = new ImageView(context);
         RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp150);
         imageView.setLayoutParams(lp);
@@ -39,22 +39,18 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ImageHolde
         return new ImageHolder(imageView);
     }
 
-    @Override public void onBindViewHolder(ImageHolder holder, int position) {
+    @Override
+    public void onBindViewHolder(ImageHolder holder, int position) {
         final FlickrPhoto imageData = images.get(position);
         Glide.with(context)
                 .load(imageData.getThumbnailUrl())
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .into(holder.imageView);
-        holder.imageView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (listener != null) {
-                    listener.onImageClicked(imageData);
-                }
-            }
-        });
+        holder.imageView.setOnClickListener(v -> listener.onImageClicked(imageData));
     }
 
-    @Override public int getItemCount() {
+    @Override
+    public int getItemCount() {
         return images.size();
     }
 

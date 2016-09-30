@@ -1,5 +1,11 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <data>
+
+        <variable
+            name="vm"
+            type="com.tramsun.flickr_gallery.features.search.SearchViewModel"/>
+    </data>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -15,6 +21,7 @@
                 android:id="@+id/flickr_tag_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:text="@={vm.searchText}"
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
                 android:inputType="text"/>
@@ -22,6 +29,7 @@
             <Button
                 android:id="@+id/search_button"
                 style="@style/Base.Widget.AppCompat.Button.Colored"
+                android:onClick="@{vm::search}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/go"/>
